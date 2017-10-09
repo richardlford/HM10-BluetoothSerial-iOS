@@ -167,9 +167,11 @@ final class BluetoothSerial: NSObject, CBCentralManagerDelegate, CBPeripheralDel
     func sendMessageToDevice(_ message: String) {
         guard isReady else { return }
         
-        if let data = message.data(using: String.Encoding.utf8) {
-            connectedPeripheral!.writeValue(data, for: writeCharacteristic!, type: writeType)
-        }
+        let speeds = message.split(separator: ",")
+        guard speeds.count == 2 else { return }
+        guard let leftSignedSpeed = Int8(speeds[0]) else { return }
+        guard let rightSignedSpeed = Int8(speeds[1]) else { return }
+        sendBytesToDevice([UInt8(1), UInt8(bitPattern: leftSignedSpeed), UInt8(bitPattern: rightSignedSpeed)])
     }
     
     /// Send an array of bytes to the device
